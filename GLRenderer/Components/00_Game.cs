@@ -1,4 +1,4 @@
-﻿// #define TERMINAL_RENDERER
+﻿#define TERMINAL_RENDERER
 
 using OpenTK.Windowing.Desktop;
 using System.Drawing;
@@ -98,7 +98,7 @@ namespace GLRenderer.Components
             Console.CursorVisible = false;
             Task.Run(() =>
             {
-                renderer.RenderBitmap(bmp, false);
+                renderer.RenderBitmap(bmp, true);
                 bmp.Dispose();
             });
             #endif
@@ -112,7 +112,7 @@ namespace GLRenderer.Components
                 WindowSize = size
             });
 
-            CheckError("UpdateFrame");
+            //CheckError("UpdateFrame");
         }
 
         private void Window_RenderFrame(FrameEventArgs e)
@@ -132,7 +132,7 @@ namespace GLRenderer.Components
             Window.SwapBuffers();
             GL.Flush();
 
-            CheckError("RenderFrame");
+            //CheckError("RenderFrame");
         }
 
         private void Resize(Vector2i size)

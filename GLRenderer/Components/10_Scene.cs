@@ -17,12 +17,17 @@ namespace GLRenderer.Components
 
             var solids = Components.Where((c) => (c is Solid) && c.Enabled).Select((c) => c as Solid);
             var lights = Components.Where((c) => (c is Light) && c.Enabled).Select((c) => c as Light);
+            var guis = Components.Where((c) => (c is GUI) && c.Enabled).Select((c) => c as GUI);
             foreach (Light l in lights)
             {
                 if(renderInvisibleObjects) l.Render(Camera, Camera, lights);
             }
             foreach (Solid s in solids) {
                 s.Render(Camera, Camera, lights);
+            }
+            foreach (GUI g in guis)
+            {
+                g.Render(Camera, Camera, lights);
             }
 
             if (renderInvisibleObjects) Camera.Render(Camera, Camera, lights);

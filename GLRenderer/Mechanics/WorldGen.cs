@@ -74,7 +74,8 @@ namespace GLRenderer.Mechanics
                         posX * biomeScale,
                         1,
                         posZ * biomeScale,
-                        false, true) * 1) + 2)
+                        false, true) * 0 + 2
+                        ))
                     {
                         case 0:
                             // Desert

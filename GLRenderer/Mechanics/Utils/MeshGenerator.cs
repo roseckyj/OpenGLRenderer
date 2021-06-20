@@ -16,7 +16,7 @@ namespace GLRenderer.Mechanics.Utils
             BlockType.Air, BlockType.Leaves, BlockType.Cactus
         };
 
-        public static Mesh GenerateChunkMesh(Chunk chunk)
+        public static Tuple<IEnumerable<Vertex>, IEnumerable<uint>> GenerateChunkMesh(Chunk chunk)
         {
             float texSize = 1f / 16;
 
@@ -120,7 +120,7 @@ namespace GLRenderer.Mechanics.Utils
                 });
             }
 
-            return new Mesh(vertices, indices, Manager.Material.Get("block"));
+            return new(vertices, indices);
         }
 
         private static Vertex VertexBuilder(float x, float sx, float y, float sy, float z, float sz, float nx, float ny, float nz, float u, float v, BlockType type) {

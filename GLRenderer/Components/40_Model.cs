@@ -10,43 +10,43 @@ namespace GLRenderer.Components
 {
     public class Model : IDisposable
     {
-        private Mesh[] meshes;
+        public Mesh[] Meshes { get; private set; }
 
         public Model(IEnumerable<Mesh> meshes) {
-            this.meshes = meshes.ToArray();
+            this.Meshes = meshes.ToArray();
         }
 
         public Model(Mesh mesh)
         {
-            meshes = new Mesh[] { mesh };
+            Meshes = new Mesh[] { mesh };
         }
 
         public void Render(Shader shader)
         {
-            foreach (Mesh m in meshes) {
+            foreach (Mesh m in Meshes) {
                 m.Render(shader);
             }
         }
 
         public void Dispose()
         {
-            foreach (Mesh m in meshes) {
+            foreach (Mesh m in Meshes) {
                 m.Dispose();
             }
         }
 
         public void ReplaceWith(Model newModel) {
-            meshes = newModel.meshes;
+            Meshes = newModel.Meshes;
         }
 
         public Model Copy()
         {
-            Model copy = new Model(this.meshes);
+            Model copy = new Model(this.Meshes);
             return copy;
         }
 
         public Model Inverted() {
-            return new Model(meshes.Select((m) => m.Inverted()));
+            return new Model(Meshes.Select((m) => m.Inverted()));
         }
 
         #region Load .obj
@@ -148,7 +148,7 @@ namespace GLRenderer.Components
         }
         public static Model FromObjFile(string path, Material material) {
             Model model = FromObjFile(path);
-            foreach (Mesh m in model.meshes) {
+            foreach (Mesh m in model.Meshes) {
                 m.Material = material;
             }
             return model;
