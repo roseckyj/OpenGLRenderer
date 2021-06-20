@@ -9,6 +9,13 @@ namespace GLRenderer.Mechanics.Utils
 {
     public static class Tools
     {
+        /// <summary>
+        /// Check for intersection of a ray and a rectangle and returns the distance (or -1 if no intersection found)
+        /// 
+        /// Adapted from
+        /// https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution
+        /// https://courses.cs.washington.edu/courses/csep557/10au/lectures/triangle_intersection.pdf
+        /// </summary>
         public static double RayRectangleIntersect(
             Vector3d orig, Vector3d dir,
             Vector3d v0, Vector3d v1, Vector3d v2, Vector3d v3)

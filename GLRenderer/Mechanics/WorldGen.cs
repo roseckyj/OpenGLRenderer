@@ -58,7 +58,7 @@ namespace GLRenderer.Mechanics
 
         public Chunk GenerateChunk(Vector2i position)
         {
-            float biomeScale = 0.001f;
+            float biomeScale = 0.003f;
 
             Block[,,] blocks = new Block[16, 256, 16];
 
@@ -74,7 +74,7 @@ namespace GLRenderer.Mechanics
                         posX * biomeScale,
                         1,
                         posZ * biomeScale,
-                        false, true) * 0 + 2
+                        false, true) * 3
                         ))
                     {
                         case 0:
