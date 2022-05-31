@@ -51,7 +51,7 @@ namespace GLRenderer.Components
             shader.SetInt("spotLights[0].use", 0);
             shader.SetInt("pointLights[0].use", 0);
 
-            Model.Camera(new Material(Vector3.One * 10)).Render(shader);
+            // Model.Camera(new Material(Vector3.One * 10)).Render(shader);
         }
 
         public override Matrix4 GetProjectionMatrix()

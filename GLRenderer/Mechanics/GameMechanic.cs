@@ -15,8 +15,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace GLRenderer.Mechanics
 {
-    public class GameMechanic
-    {
+    public class GameMechanic {
         private Game game;
         private Scene scene;
 
@@ -26,14 +25,31 @@ namespace GLRenderer.Mechanics
         private Solid skybox;
         private Solid selector;
         private Solid character;
+        private DirectionalLight sun;
+        private PointLight torch;
         private Label coords;
         private GUIPlane itemSelector;
+
+        private BlockType[] inventoryItems = {
+            BlockType.Grass,
+            BlockType.Dirt,
+            BlockType.Stone,
+            BlockType.Sand,
+            BlockType.Sandstone,
+            BlockType.Log,
+            BlockType.Leaves,
+            BlockType.Cactus,
+            BlockType.Torch
+        };
 
         private Vector3i lookAt;
         private Vector3i lookAtSide = new Vector3i(0);
 
         private Vector3i digging;
         private float digProgress = 0;
+        private double placeCountdown = 0;
+
+        private double time = Math.PI / 4;
 
         const float speedFloor = 30f;
         const float speedAir = 20f;
@@ -92,9 +108,12 @@ namespace GLRenderer.Mechanics
             Manager.Model.CreateFromObjFile("steve", "Resources/models/steve.obj");
 
             scene.Components.Add(new Camera(new Vector3(0, 200, 0), game.Window.Size.X / game.Window.Size.Y));
-            scene.Components.Add(new DirectionalLight(Quaternion.FromEulerAngles(-1f, 0.5f, 0.8f), Vector3.One, Vector3.One * 0.5f) {
+
+            sun = new DirectionalLight(Quaternion.FromEulerAngles((float)((-90f - 23.4f) / 180f * Math.PI), 0f, 0f), Vector3.One, Vector3.One * 0.5f)
+            {
                 AmbientColor = Vector3.One * 0.4f
-            });
+            };
+            scene.Components.Add(sun);
 
             selector = new Solid(Model.Cube(Manager.Material.Get("selector")), UnlitShader.Instance) {
                 Scale = new Vector3(1.01f),
@@ -113,6 +132,9 @@ namespace GLRenderer.Mechanics
             };
             scene.Components.Add(character);
 
+            torch = new PointLight(character.Position, new Vector3(0.5f, 0.3f, 0.0f), new Vector3(0.5f, 0.3f, 0.0f) * 0.5f);
+            scene.Components.Add(torch);
+
             coords = new Label(new Vector2(-0.95f, 0.93f), 0.010f, Manager.Material.Get("ascii"), "");
             scene.Components.Add(coords);
 
@@ -121,14 +143,29 @@ namespace GLRenderer.Mechanics
 
             scene.Components.Add(new GUIPlane(Vector2.Zero, new Vector2(0.02f), Manager.Material.Get("icons"), Vector2.Zero, new Vector2(1 / 16f)));
             scene.Components.Add(new GUIPlane(new Vector2(0, -0.9f), new Vector2(0.3f, 0.3f * (22f / 182)), Manager.Material.Get("widgets"), Vector2.Zero, new Vector2(182f / 256, 22f / 256)));
+
+            for (int i = 0; i < 10; i++) {
+                if (inventoryItems.Length > i)
+                {
+                    Vector2 texCoords = MeshGenerator.GetTexCoords(inventoryItems[i]).Item2;
+
+                    GUIPlane item = new GUIPlane(new Vector2(0, -0.9f), new Vector2((0.3f / 9) * 0.5f), Manager.Material.Get("block"), texCoords, texCoords + new Vector2(1f / 16, 1f / 16));
+                    item.Position = new Vector3((0.3f / 182 * 40) * (i - 4), -0.9f, -0.9f);
+
+                    scene.Components.Add(item);
+                }
+            }
         }
 
         private Vector3 velocity = Vector3.Zero;
 
         private void OnFrameUpdate(object sender, UpdateFrameEventArgs args) {
+            // time += args.DeltaTime;
 
             UpdateMovement(args);
             UpdateLookAt(args);
+
+            sun.Rotation = Quaternion.FromEulerAngles((float)((-90f - 23.4f) / 180f * Math.PI), (float)(time / 2f), 0f);
 
             skybox.Position = scene.Camera.Position;
             character.Position = scene.Camera.Position - new Vector3(0, height, 0);
@@ -137,6 +174,13 @@ namespace GLRenderer.Mechanics
             coords.Text = $"X:{Math.Floor(character.Position.X)} Y:{Math.Floor(character.Position.Y)} Z:{Math.Floor(character.Position.Z)}";
 
             itemSelector.Position = new Vector3((0.3f / 182 * 40) * (inventory.SelectedIndex - 4), -0.9f, -1f);
+
+            if (inventory.SelectedIndex <= inventoryItems.Length && inventoryItems[inventory.SelectedIndex] == BlockType.Torch) {
+                torch.Enabled = true;
+                torch.Position = scene.Camera.Position;
+            } else {
+                torch.Enabled = false;
+            }
 
             blocks.Update();
         }
@@ -315,6 +359,34 @@ namespace GLRenderer.Mechanics
             {
                 digProgress = 0;
             }
+            
+            if (args.MouseState.IsButtonDown(MouseButton.Right) && lookAtSide.EuclideanLength > 0)
+            {
+                Vector3 placeLocation = lookAt + lookAtSide;
+                Vector3 playerPos = new Vector3(MathF.Floor(character.Position.X), MathF.Floor(character.Position.Y), MathF.Floor(character.Position.Z));
+
+                if (inventory.SelectedIndex <= inventoryItems.Length) {
+                    BlockType type = inventoryItems[inventory.SelectedIndex];
+
+                    if (placeCountdown <= 0 && playerPos != placeLocation && playerPos + new Vector3(0, +1, 0) != placeLocation && type != BlockType.Torch)
+                    {
+                        blocks.SetBlock(placeLocation, new Block(type));
+                        // TODO: inventory
+                        var chunk = blocks.GetChunk(placeLocation);
+                        chunk.GenerateMesh();
+                        var index = scene.Components.IndexOf(chunk.Component);
+                        chunk.CreateComponent();
+                        scene.Components[index] = chunk.Component;
+                        placeCountdown = 0.2;
+                    }
+                }
+            }
+
+            if (placeCountdown > 0)
+            {
+                placeCountdown -= args.DeltaTime;
+            }
+
             selector.Model.Meshes[0].Material = Manager.Material.Get($"selector_{Math.Floor(digProgress * 11)}");
         }
 

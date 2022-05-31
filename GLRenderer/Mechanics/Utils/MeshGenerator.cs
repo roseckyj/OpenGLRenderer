@@ -139,7 +139,7 @@ namespace GLRenderer.Mechanics.Utils
             return new Vertex(new Vector3(x + sx, y + sy, z + sz), new Vector3(nx, ny, nz), new Vector2(u, v));
         }
 
-        private static Tuple<Vector2, Vector2, Vector2> GetTexCoords(BlockType type)
+        public static Tuple<Vector2, Vector2, Vector2> GetTexCoords(BlockType type)
         {
             Vector2 top = new(12, 14); // WIP texture
             Vector2 side = new(12, 14); // WIP texture
@@ -190,6 +190,11 @@ namespace GLRenderer.Mechanics.Utils
                     top = new(5, 4);
                     side = new(6, 4);
                     bottom = new(7, 4);
+                    break;
+                case BlockType.Torch:
+                    top = new(0, 5);
+                    side = new(0, 5);
+                    bottom = new(0, 5);
                     break;
             }
             return new(top / 16, side / 16, bottom / 16);

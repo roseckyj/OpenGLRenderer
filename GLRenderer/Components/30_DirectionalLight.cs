@@ -61,7 +61,7 @@ namespace GLRenderer.Components
 
             shader.SetMatrix4("view", camera.GetViewMatrix(camera));
             shader.SetMatrix4("projection", camera.GetProjectionMatrix());
-            shader.SetMatrix4("model", Matrix4.CreateScale(new Vector3(3f)) * Matrix4.CreateFromQuaternion(Rotation) * Matrix4.CreateTranslation(-Front * 20f) * Matrix4.CreateTranslation(playerPos.Position));
+            shader.SetMatrix4("model", Matrix4.CreateScale(new Vector3(20f)) * Matrix4.CreateFromQuaternion(Rotation) * Matrix4.CreateTranslation(-Front * 150f) * Matrix4.CreateTranslation(playerPos.Position));
             shader.SetVector3("viewPos", camera.Position);
 
             DirectionalLight.None.Use(shader, 0, camera);

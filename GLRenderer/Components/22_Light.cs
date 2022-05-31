@@ -20,7 +20,7 @@ namespace GLRenderer.Components
         int depthMapFBO;
 
         public Light() {
-            shadowSize = new Vector2i(2048);
+            shadowSize = new Vector2i(4096);
             depthMap = Texture.CreateShadowMap(shadowSize);
             depthMapFBO = GL.GenFramebuffer();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, depthMapFBO);

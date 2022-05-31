@@ -97,6 +97,8 @@ void main()
     vec3 norm = normalize(normal);
     vec3 viewDir = normalize(viewPos - fragPos);
 
+    float dist = length(viewPos - fragPos);
+
 
     // Directional light
     float shadowDir = GetShadow(dirLight.matrix, dirLight.shadowMap, norm);
@@ -116,7 +118,7 @@ void main()
         result += CalcSpotLight(spotLights[i], norm, fragPos, viewDir, shadowSpot);
     }
 
-    FragColor = vec4(result, 1.0);
+    FragColor = mix(vec4(result, 1.0), vec4(172 / 255.0, 225 / 255.0, 235 / 255.0, 1.0), clamp(dist * 0.1f - 4, 0, 1));
     
 }
 
@@ -211,6 +213,23 @@ vec3 GetSpecularColor()
     return material.specularColor;
 }
 
+float GetShadowTex(sampler2D shadowMap, vec2 texCoords, float currentDepth) {
+    float bias = 0.002;    
+    int rad = 2;
+
+    int items = 0;
+    float shadow = 0;
+    for (int x = -rad; x <= rad; x++) {
+        for (int y = -rad; y <= rad; y++) {
+            float pcfDepth = texture(shadowMap, (texCoords + vec2(x, y)) / textureSize(shadowMap, 0)).r;
+            shadow += (currentDepth - bias > pcfDepth ? 0.0 : 1.0);
+            items++;
+        }
+    }
+
+    return shadow / items;    
+}
+
 float GetShadow(mat4 matrix, sampler2D shadowMap, vec3 normal) {
     vec4 pos = vec4(fragPos, 1.0) * matrix;
     vec3 projCoords = pos.xyz / pos.w;
@@ -218,20 +237,29 @@ float GetShadow(mat4 matrix, sampler2D shadowMap, vec3 normal) {
     float closestDepth = texture(shadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
 
+    vec2 texCoords = projCoords.xy * textureSize(shadowMap, 0);
+
     float bias = 0.002;
 
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    int rad = 1;
-    for(int x = -rad; x <= rad; ++x)
-    {
-        for(int y = -rad; y <= rad; ++y)
-        {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-            shadow += (currentDepth - bias > pcfDepth ? 1.0 : 0.0);
-        }    
-    }
-    shadow /= (2 * rad + 1) * (2 * rad + 1);
+    float pcfDepth;
+
+    pcfDepth = GetShadowTex(shadowMap, vec2(floor(texCoords.x), floor(texCoords.y)), currentDepth);
+    float shadowFF = (currentDepth - bias > pcfDepth ? 1.0 : 0.0);
+
+    pcfDepth = GetShadowTex(shadowMap, vec2(floor(texCoords.x), ceil(texCoords.y)), currentDepth);
+    float shadowFC = (currentDepth - bias > pcfDepth ? 1.0 : 0.0);
+
+    pcfDepth = GetShadowTex(shadowMap, vec2(ceil(texCoords.x), floor(texCoords.y)), currentDepth);
+    float shadowCF = (currentDepth - bias > pcfDepth ? 1.0 : 0.0);
+
+    pcfDepth = GetShadowTex(shadowMap, vec2(ceil(texCoords.x), ceil(texCoords.y)), currentDepth);
+    float shadowCC = (currentDepth - bias > pcfDepth ? 1.0 : 0.0);
+
+    float left = mix(shadowFF, shadowFC, texCoords.y - floor(texCoords.y));
+    float right = mix(shadowCF, shadowCC, texCoords.y - floor(texCoords.y));
+
+    float shadow = mix(left, right, texCoords.x - floor(texCoords.x));
+
 
     if(projCoords.z > 1.0) {
         shadow = 0.0;

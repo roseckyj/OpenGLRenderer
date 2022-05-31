@@ -25,6 +25,7 @@ namespace GLRenderer.Mechanics.Classes
         Leaves,
         Cactus,
         Sand,
-        Sandstone
+        Sandstone,
+        Torch
     }
 }

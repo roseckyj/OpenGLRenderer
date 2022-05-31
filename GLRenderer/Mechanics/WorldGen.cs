@@ -45,6 +45,16 @@ namespace GLRenderer.Mechanics
                     z * noise3Scale,
                     false, true) * 80 +
                 100);
+
+            
+
+            //float noiseScale = 0.1f;
+
+            //return (int)(NoiseHelper.CarmodyNoise(
+            //        x * noiseScale,
+            //        1,
+            //        z * noiseScale,
+            //        false, true) * 20 + 100);
         }
 
         private bool TreeNoise(int x, int z, float threshold)
@@ -62,9 +72,11 @@ namespace GLRenderer.Mechanics
 
             Block[,,] blocks = new Block[16, 256, 16];
 
+
             for (int x = 0; x < 16; x++)
                 for (int z = 0; z < 16; z++)
                 {
+
                     int posX = (position.X * 16 + x);
                     int posZ = (position.Y * 16 + z);
 

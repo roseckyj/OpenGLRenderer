@@ -1,4 +1,4 @@
-﻿#define TERMINAL_RENDERER
+﻿// #define TERMINAL_RENDERER
 
 using OpenTK.Windowing.Desktop;
 using System.Drawing;
